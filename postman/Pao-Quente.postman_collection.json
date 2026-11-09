@@ -1,0 +1,433 @@
+{
+  "info": {
+    "_postman_id": "bd645310-0b53-4dd7-94cf-5786dd6db7d2",
+    "name": "Pão Quente - API",
+    "description": "Testes locais do catálogo, encomendas e painel administrativo. Selecione o ambiente Pão Quente - Local. Execute as requisições na ordem; o login guarda o cookie da sessão no Postman.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Saúde da API",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "health"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('API e banco estão disponíveis', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().database).to.eql('connected');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Listar catálogo",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "products"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Catálogo retornado pelo banco', function () {",
+              "  pm.response.to.have.status(200);",
+              "  const products = pm.response.json();",
+              "  pm.expect(products).to.be.an('array');",
+              "  pm.expect(products.length).to.be.above(0);",
+              "  pm.environment.set('produtoId', products[0].id);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Validar pedido incompleto (esperado 400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"\",\n  \"itens\": []\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/orders",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "orders"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Pedido incompleto é recusado', function () {",
+              "  pm.response.to.have.status(400);",
+              "  pm.expect(pm.response.json().error).to.be.a('string');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Criar encomenda de demonstração",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());",
+              "const date = Object.fromEntries(parts.map((part) => [part.type, part.value]));",
+              "const tomorrow = new Date(Date.UTC(Number(date.year), Number(date.month) - 1, Number(date.day) + 1));",
+              "pm.environment.set('dataRetirada', tomorrow.toISOString().slice(0, 10));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Encomenda criada usando preços do banco', function () {",
+              "  pm.response.to.have.status(201);",
+              "  const order = pm.response.json();",
+              "  pm.expect(order.numero).to.be.a('number');",
+              "  pm.expect(order.valorTotal).to.be.a('number');",
+              "  pm.environment.set('encomendaId', order.numero);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Cliente Postman\",\n  \"telefone\": \"11988887777\",\n  \"dataRetirada\": \"{{dataRetirada}}\",\n  \"horarioRetirada\": \"10:30\",\n  \"observacoes\": \"Pedido criado para teste pelo Postman\",\n  \"itens\": [\n    {\n      \"produtoId\": {{produtoId}},\n      \"quantidade\": 2\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/orders",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "orders"]
+        }
+      }
+    },
+    {
+      "name": "5. Login administrativo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuario\": \"{{adminUsername}}\",\n  \"senha\": \"{{adminPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "admin", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login administrativo aceito', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().usuario).to.eql(pm.environment.get('adminUsername'));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Conferir sessão administrativa",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/me",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "admin", "me"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Sessão autenticada', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().usuario).to.eql(pm.environment.get('adminUsername'));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Listar encomendas",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/orders",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "admin", "orders"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Encomendas acessíveis para administrador', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json()).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Atualizar status da encomenda",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"Em preparação\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/orders/{{encomendaId}}/status",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "admin", "orders", "{{encomendaId}}", "status"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status da encomenda atualizado', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().status).to.eql('Em preparação');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Cadastrar produto",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"{{produtoTesteNome}}\",\n  \"descricao\": \"Produto criado durante o teste da API.\",\n  \"preco\": 12.5,\n  \"categoria\": \"Pães\",\n  \"imagem\": \"https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=85\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/products",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "admin", "products"]
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set('produtoTesteNome', 'Produto Postman ' + Date.now());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Produto cadastrado', function () {",
+              "  pm.response.to.have.status(201);",
+              "  const product = pm.response.json();",
+              "  pm.expect(product.id).to.be.a('number');",
+              "  pm.environment.set('adminProdutoId', product.id);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Editar produto",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"{{produtoTesteNome}}\",\n  \"descricao\": \"Produto atualizado durante o teste da API.\",\n  \"preco\": 13.5,\n  \"categoria\": \"Pães\",\n  \"imagem\": \"https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=85\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/products/{{adminProdutoId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "admin", "products", "{{adminProdutoId}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Produto atualizado', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().preco).to.eql('13.50');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Desativar produto de demonstração",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/products/{{adminProdutoId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "admin", "products", "{{adminProdutoId}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Produto removido do catálogo ativo', function () {",
+              "  pm.response.to.have.status(204);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Logout administrativo",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/logout",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "admin", "logout"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Sessão encerrada', function () {",
+              "  pm.response.to.have.status(204);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

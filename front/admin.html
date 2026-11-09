@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Área administrativa de encomendas e produtos da Padaria Pão Quente.">
+  <title>Painel da equipe — Pão Quente</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/admin.js" defer></script>
+</head>
+<body class="admin-page">
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Pão Quente, página inicial"><span class="brand-mark">PQ</span><span><strong>Pão Quente</strong><small>Painel da equipe</small></span></a>
+    <a class="text-link" href="/">Voltar à loja</a>
+  </header>
+  <main class="admin-main">
+    <section id="login-view" class="panel login-panel">
+      <p class="eyebrow">Acesso restrito à equipe</p><h1>Bem-vindo de volta.</h1><p>Entre para acompanhar as encomendas e atualizar o catálogo.</p>
+      <form id="login-form">
+        <label for="login-user">Usuário</label><input id="login-user" name="usuario" required autocomplete="username">
+        <label for="login-password">Senha</label><input id="login-password" name="senha" type="password" required autocomplete="current-password">
+        <p id="login-message" class="status-message" role="status"></p>
+        <button class="button button-primary button-full" type="submit">Entrar no painel</button>
+      </form>
+    </section>
+    <section id="dashboard-view" hidden>
+      <div class="admin-heading"><div><p class="eyebrow">Rotina da padaria</p><h1>Painel de encomendas</h1></div><button id="logout-button" class="button button-outline" type="button">Sair</button></div>
+      <div class="admin-tabs" role="tablist"><button class="admin-tab active" data-tab="orders" type="button">Encomendas</button><button class="admin-tab" data-tab="products" type="button">Produtos</button></div>
+      <section id="orders-tab" class="admin-tab-content">
+        <p id="orders-message" class="status-message" role="status"></p>
+        <div id="orders-list" class="orders-list"><p class="loading-message">Carregando encomendas...</p></div>
+      </section>
+      <section id="products-tab" class="admin-tab-content" hidden>
+        <div class="admin-product-layout">
+          <form id="product-form" class="panel product-form">
+            <p class="eyebrow">Catálogo</p><h2 id="product-form-title">Novo produto</h2>
+            <input id="product-id" type="hidden">
+            <label for="product-name">Nome</label><input id="product-name" required minlength="2" maxlength="120">
+            <label for="product-description">Descrição</label><textarea id="product-description" required minlength="2" maxlength="500" rows="3"></textarea>
+            <div class="form-row">
+              <div><label for="product-price">Preço (R$)</label><input id="product-price" type="number" min="0.01" max="100000" step="0.01" required></div>
+              <div><label for="product-category">Categoria</label><select id="product-category" required><option value="Pães">Pães</option><option value="Bolos">Bolos</option></select></div>
+            </div>
+            <label for="product-image">URL da imagem</label><input id="product-image" type="url" required maxlength="500" placeholder="https://...">
+            <p id="product-message" class="status-message" role="status"></p>
+            <button id="save-product" class="button button-primary button-full" type="submit">Cadastrar produto</button>
+            <button id="cancel-edit" class="button button-outline button-full" type="button" hidden>Cancelar edição</button>
+          </form>
+          <div><h2 class="list-heading">Produtos ativos</h2><p id="products-message" class="status-message" role="status"></p><div id="admin-products" class="admin-products-list"><p class="loading-message">Carregando produtos...</p></div></div>
+        </div>
+      </section>
+    </section>
+  </main>
+  <script src="/js/common.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore os pães artesanais e bolos caseiros da Padaria Pão Quente.">
+  <title>Catálogo — Pão Quente</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/common.js" defer></script>
+  <script src="/js/catalog.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Pão Quente, página inicial"><span class="brand-mark">PQ</span><span><strong>Pão Quente</strong><small>Padaria Artesanal</small></span></a>
+    <button class="menu-toggle" aria-label="Abrir menu" aria-expanded="false">☰</button>
+    <nav class="main-nav" aria-label="Navegação principal"><a href="/">Início</a><a class="active" href="/catalogo.html">Catálogo</a><a href="/encomenda.html">Sua encomenda <span class="cart-count">0</span></a></nav>
+  </header>
+  <main>
+    <section class="page-banner catalog-banner"><p class="eyebrow">Feito à mão, com ingredientes de verdade</p><h1>Nosso catálogo</h1><p>Escolha seus favoritos e prepare sua próxima pausa gostosa.</p></section>
+    <section class="section catalog-section">
+      <div class="filter-row" aria-label="Filtrar produtos">
+        <button class="filter-button active" data-category="Todos">Todos</button>
+        <button class="filter-button" data-category="Pães">Pães</button>
+        <button class="filter-button" data-category="Bolos">Bolos</button>
+      </div>
+      <p id="catalog-message" class="status-message" role="status"></p>
+      <div id="catalog-products" class="product-grid">
+        <p class="loading-message">Carregando nosso catálogo...</p>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer"><a class="brand brand-footer" href="/"><span class="brand-mark">PQ</span><span><strong>Pão Quente</strong><small>Padaria Artesanal</small></span></a><p>Feito com carinho, todos os dias. © <span id="year"></span> Pão Quente.</p><a href="/admin.html">Acesso da equipe</a></footer>
+</body>
+</html>
